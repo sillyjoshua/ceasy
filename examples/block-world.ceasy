@@ -1,0 +1,24 @@
+# A tiny Minecraft-style scene in Ceasy!
+window("My Block World", 800, 600);
+
+# The numbers are pixel positions. Blocks are 32 pixels by default.
+block(80, 360, "grass");
+block(112, 360, "grass");
+block(144, 360, "dirt");
+block(176, 360, "stone");
+block(208, 360, "stone");
+block(240, 360, "sand");
+block(272, 360, "water");
+
+# Build a little tree from wood and leaves.
+block(420, 300, "wood");
+block(420, 268, "wood");
+block(388, 236, "leaves");
+block(420, 236, "leaves");
+block(452, 236, "leaves");
+block(420, 204, "leaves");
+
+# Add a player. Move with WASD or the arrow keys.
+player(120, 310);
+text(20, 20, "My first block world!");
+text(20, 44, "Move with WASD or arrow keys");
