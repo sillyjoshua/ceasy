@@ -1,0 +1,52 @@
+name: Publish Ceasy release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to release (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+ njobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: python -m pip install --upgrade pip pyinstaller
+
+      - name: Build standalone Ceasy runtime
+        run: pyinstaller --onefile --console --name ceasy ceasy_launcher.py
+
+      - name: Assemble release bundle
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item dist/ceasy.exe release/ceasy.exe
+          Copy-Item install-windows.bat release/install-windows.bat
+          Copy-Item README.md release/README.md
+          Copy-Item docs/13-double-click-windows.md release/WINDOWS-SETUP.md
+          Compress-Archive -Path release/* -DestinationPath ceasy-windows.zip -Force
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') { '${{ inputs.tag }}' } else { '${{ github.ref_name }}' }
+          gh release create $tag ceasy-windows.zip --title "Ceasy $tag" --generate-notes --latest
