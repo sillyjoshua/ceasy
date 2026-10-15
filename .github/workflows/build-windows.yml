@@ -1,0 +1,45 @@
+name: Build Windows double-click bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ceasy_runtime.py'
+      - 'ceasy_launcher.py'
+      - 'requirements-build.txt'
+      - 'install-windows.bat'
+      - '.github/workflows/build-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install packager
+        run: python -m pip install -r requirements-build.txt
+      - name: Build standalone Ceasy runtime
+        run: python -m PyInstaller --noconfirm --clean --onefile --console --name ceasy ceasy_launcher.py
+      - name: Assemble bundle
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/ceasy-windows | Out-Null
+          Copy-Item dist/ceasy.exe dist/ceasy-windows/ceasy.exe
+          Copy-Item install-windows.bat dist/ceasy-windows/install-windows.bat
+          Copy-Item README.md dist/ceasy-windows/README.md
+          Compress-Archive -Path dist/ceasy-windows/* -DestinationPath dist/ceasy-windows.zip -Force
+      - name: Upload Windows bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ceasy-windows
+          path: dist/ceasy-windows.zip
+          if-no-files-found: error
+          retention-days: 90

@@ -1,28 +1,35 @@
 # Ceasy
 
-**C, without the intimidating first step.** Ceasy is a small, beginner-friendly, C-inspired language project. It uses readable commands such as `print("Hello!");` and `let score = 10;`, then translates supported Ceasy code into C.
+**C, without the intimidating first step.** Ceasy is a small, beginner-friendly, C-inspired language project. It uses readable commands such as `print("Hello!");` and `let score = 10;`.
 
-> **Status: early prototype.** This repository includes a small Python transpiler and a learning guide. It is not a replacement for C, and the current compiler supports only the subset documented here.
+> **Status: early prototype.** Ceasy includes a small Python-to-C transpiler, a standalone Windows double-click runtime build, and a full Markdown learning guide. The runtime supports a smaller subset than a complete programming language; see the documentation for exact limitations.
 
-## Quick start
+## Windows: double-click `.ce` and `.ceasy` files
 
-Requirements: Python 3.10+ and a C compiler such as GCC or Clang.
+1. Open the [Windows bundle workflow](https://github.com/sillyjoshua/ceasy/actions/workflows/build-windows.yml) and choose the latest successful run.
+2. Download its `ceasy-windows` artifact and extract the ZIP to a permanent folder.
+3. Double-click `install-windows.bat` once.
+4. Create a `.ce` or `.ceasy` file and double-click it to run.
 
-```bash
-python3 ceasy.py examples/hello.ceasy -o hello.c
-gcc hello.c -o hello
-./hello
-```
+The bundle includes a standalone runtime, so Python and GCC are not required for the supported runtime syntax. Keep `ceasy.exe` in the folder where you extracted it. See [the full Windows setup guide](docs/13-double-click-windows.md).
 
-On Windows, run `py ceasy.py examples/hello.ceasy -o hello.c`, then compile `hello.c` with GCC/Clang (for example, through MinGW-w64).
-
-Example program (`examples/hello.ceasy`):
+## Example
 
 ```ceasy
 # My first Ceasy program
 print("Hello, world!");
 let score = 42;
 print(score);
+```
+
+## Developer / transpiler quick start
+
+For translating Ceasy source into C, Python 3.10+ and GCC or Clang are still required:
+
+```bash
+python3 ceasy.py examples/hello.ceasy -o hello.c
+gcc hello.c -o hello
+./hello
 ```
 
 ## Learn Ceasy
@@ -41,21 +48,21 @@ Start with [`docs/00-start-here.md`](docs/00-start-here.md). The full guide live
 10. [Compiler internals](docs/10-compiler-internals.md)
 11. [Exercises](docs/11-exercises.md)
 12. [FAQ and roadmap](docs/12-faq-roadmap.md)
+13. [Double-click Windows setup](docs/13-double-click-windows.md)
 
 ## What works today
 
-- `print(expression);` for string literals and simple numeric expressions/variables
-- `let name = expression;` with basic type inference for integer, decimal and string literals
-- C-style comments (`// ...`) and Ceasy comments (`# ...`)
-- A limited subset of C-style control-flow lines; see the reference for limitations
-- `--check` to validate supported syntax without writing output
+- `print(expression);` for supported strings, numbers, and variables
+- `let name = expression;` with basic type inference in the transpiler
+- A small standalone Windows runtime for double-clicking files
+- `--check` to validate supported transpiler syntax
 - `-o FILE` to choose generated C output
 
-The prototype is intentionally small. It does not yet implement a full parser or every C feature.
+Ceasy is intentionally small. It does not yet implement a complete parser or every C feature. The double-click runtime and C transpiler have different supported syntax; consult the docs before relying on advanced control flow.
 
 ## Contributing
 
-Issues and pull requests are welcome. Please include a small `.ceasy` example and expected generated C when proposing syntax changes. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.
+Issues and pull requests are welcome. Please include a small `.ceasy` example and expected behavior when proposing syntax changes. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.
 
 ## License
 
