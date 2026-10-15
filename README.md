@@ -2,7 +2,7 @@
 
 **C, without the intimidating first step.** Ceasy is a small, beginner-friendly, C-inspired language project. It uses readable commands such as `print("Hello!");` and `let score = 10;`.
 
-> **Status: early prototype.** Ceasy includes a small Python-to-C transpiler, a standalone Windows double-click runtime build, and a full Markdown learning guide. The runtime supports a smaller subset than a complete programming language; see the documentation for exact limitations.
+> **Status: early prototype.** Ceasy includes a small Python-to-C transpiler, a standalone Windows double-click runtime, beginner docs, and simple Minecraft-style 2D block graphics in the runtime.
 
 ## Windows: double-click `.ce` and `.ceasy` files
 
@@ -11,7 +11,24 @@
 3. Double-click `install-windows.bat` once.
 4. Create a `.ce` or `.ceasy` file and double-click it to run.
 
-The bundle includes a standalone runtime, so Python and GCC are not required for the supported runtime syntax. Keep `ceasy.exe` in the folder where you extracted it. See [the full Windows setup guide](docs/13-double-click-windows.md).
+Keep `ceasy.exe` in the folder where you extracted it. The standalone runtime does not require you to install Python or GCC for supported syntax. See the [Windows setup guide](docs/13-double-click-windows.md).
+
+## Make a block world
+
+The runtime includes a tiny, beginner-friendly 2D block graphics system:
+
+```ceasy
+window("My Block World", 800, 600);
+block(100, 300, "grass");
+block(132, 300, "dirt");
+block(164, 300, "stone");
+player(200, 270);
+text(20, 20, "Hello, block world!");
+```
+
+Run `examples/block-world.ceasy` to see a landscape and tree. Move the player with **WASD** or the **arrow keys**. Available blocks include grass, dirt, stone, sand, water, wood, planks, brick, leaves, bedrock, snow, gold, diamond and lava.
+
+Read [Simple Minecraft-style graphics](docs/14-block-graphics.md) for the short guide. This is 2D block-building graphics, not a full 3D Minecraft engine. Graphics commands currently work in the double-click runtime and are not yet translated by the C transpiler.
 
 ## Example
 
@@ -32,9 +49,11 @@ gcc hello.c -o hello
 ./hello
 ```
 
+The transpiler and double-click runtime support different subsets of the language. Read the docs before relying on advanced syntax.
+
 ## Learn Ceasy
 
-Start with [`docs/00-start-here.md`](docs/00-start-here.md). The full guide lives in Markdown files under `docs/`:
+Start with [docs/00-start-here.md](docs/00-start-here.md). The learning guide is in Markdown under `docs/`:
 
 1. [Installation](docs/01-installation.md)
 2. [Your first program](docs/02-first-program.md)
@@ -49,21 +68,12 @@ Start with [`docs/00-start-here.md`](docs/00-start-here.md). The full guide live
 11. [Exercises](docs/11-exercises.md)
 12. [FAQ and roadmap](docs/12-faq-roadmap.md)
 13. [Double-click Windows setup](docs/13-double-click-windows.md)
-
-## What works today
-
-- `print(expression);` for supported strings, numbers, and variables
-- `let name = expression;` with basic type inference in the transpiler
-- A small standalone Windows runtime for double-clicking files
-- `--check` to validate supported transpiler syntax
-- `-o FILE` to choose generated C output
-
-Ceasy is intentionally small. It does not yet implement a complete parser or every C feature. The double-click runtime and C transpiler have different supported syntax; consult the docs before relying on advanced control flow.
+14. [Block graphics](docs/14-block-graphics.md)
 
 ## Contributing
 
-Issues and pull requests are welcome. Please include a small `.ceasy` example and expected behavior when proposing syntax changes. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.
+Issues and pull requests are welcome. Please include a small `.ceasy` example and expected behavior when proposing syntax changes. Read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+MIT. See [LICENSE](LICENSE).
