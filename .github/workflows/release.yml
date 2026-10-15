@@ -13,7 +13,8 @@ on:
 
 permissions:
   contents: write
- njobs:
+
+jobs:
   release:
     runs-on: windows-latest
     steps:
