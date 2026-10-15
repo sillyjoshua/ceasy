@@ -22,18 +22,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Install build tools
         run: python -m pip install --upgrade pip pyinstaller
-
       - name: Build standalone Ceasy runtime
-        run: pyinstaller --onefile --console --name ceasy ceasy_launcher.py
-
+        run: pyinstaller --noconfirm --clean --onefile --console --name ceasy ceasy_launcher.py
       - name: Assemble release bundle
         shell: pwsh
         run: |
@@ -42,8 +38,10 @@ jobs:
           Copy-Item install-windows.bat release/install-windows.bat
           Copy-Item README.md release/README.md
           Copy-Item docs/13-double-click-windows.md release/WINDOWS-SETUP.md
+          Copy-Item docs/14-block-graphics.md release/BLOCK-GRAPHICS.md
+          New-Item -ItemType Directory -Force -Path release/examples | Out-Null
+          Copy-Item examples/block-world.ceasy release/examples/block-world.ceasy
           Compress-Archive -Path release/* -DestinationPath ceasy-windows.zip -Force
-
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

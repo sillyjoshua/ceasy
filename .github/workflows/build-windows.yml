@@ -8,6 +8,10 @@ on:
       - 'ceasy_launcher.py'
       - 'requirements-build.txt'
       - 'install-windows.bat'
+      - 'README.md'
+      - 'examples/block-world.ceasy'
+      - 'docs/13-double-click-windows.md'
+      - 'docs/14-block-graphics.md'
       - '.github/workflows/build-windows.yml'
   workflow_dispatch:
 
@@ -35,6 +39,10 @@ jobs:
           Copy-Item dist/ceasy.exe dist/ceasy-windows/ceasy.exe
           Copy-Item install-windows.bat dist/ceasy-windows/install-windows.bat
           Copy-Item README.md dist/ceasy-windows/README.md
+          Copy-Item docs/13-double-click-windows.md dist/ceasy-windows/WINDOWS-SETUP.md
+          Copy-Item docs/14-block-graphics.md dist/ceasy-windows/BLOCK-GRAPHICS.md
+          New-Item -ItemType Directory -Force -Path dist/ceasy-windows/examples | Out-Null
+          Copy-Item examples/block-world.ceasy dist/ceasy-windows/examples/block-world.ceasy
           Compress-Archive -Path dist/ceasy-windows/* -DestinationPath dist/ceasy-windows.zip -Force
       - name: Upload Windows bundle
         uses: actions/upload-artifact@v4
