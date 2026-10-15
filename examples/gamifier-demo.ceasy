@@ -1,0 +1,16 @@
+# Import the local Gamifier addon from gamifier.cedev
+import gamifier;
+
+gamifier.start("My First Game");
+print("Welcome to my normal program!");
+gamifier.action("Started the program", 10);
+let result = 5 + 5;
+print("Calculated result:");
+print(result);
+gamifier.action("Solved a calculation", 20);
+gamifier.quest("Finish the program");
+gamifier.action("Completed the main task", 30);
+gamifier.complete_quest("Finish the program", 50);
+gamifier.achievement("First Program");
+gamifier.heal(20);
+gamifier.end();

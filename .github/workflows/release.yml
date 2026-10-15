@@ -45,6 +45,8 @@ jobs:
           Copy-Item examples/block-world.ceasy release/examples/block-world.ceasy
           Copy-Item examples/imports.ceasy release/examples/imports.ceasy
           Copy-Item examples/starter.cedev release/examples/starter.cedev
+          Copy-Item examples/gamifier.cedev release/examples/gamifier.cedev
+          Copy-Item examples/gamifier-demo.ceasy release/examples/gamifier-demo.ceasy
           Copy-Item examples/secret-demo.ceasy release/examples/secret-demo.ceasy
           Copy-Item examples/secret-demo.cesecret.example release/examples/secret-demo.cesecret.example
           Compress-Archive -Path release/* -DestinationPath ceasy-windows.zip -Force

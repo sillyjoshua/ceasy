@@ -2,7 +2,7 @@
 
 **C, without the intimidating first step.** Ceasy is a small, beginner-friendly, C-inspired language project. It uses readable commands such as `print("Hello!");` and `let score = 10;`.
 
-> **Version 0.2.0.** Ceasy includes a small Python-to-C transpiler, a Windows double-click runtime, Minecraft-style 2D block graphics, Python-style imports, `.cedev` addon project files, and `.cesecret` values that are redacted when printed directly.
+> **Version 0.2.1.** Ceasy includes a small Python-to-C transpiler, a Windows double-click runtime, Minecraft-style 2D block graphics, Python-style imports of local `.cedev` addon source files, and `.cesecret` values that are redacted when printed directly.
 
 ## Windows: double-click `.ce` and `.ceasy` files
 
@@ -40,7 +40,7 @@ let roll = random.randint(1, 6);
 print(roll);
 ```
 
-A `.cedev` file is a small JSON project manifest. Double-click it to install its listed Python packages (addons). Addon installation requires Python and pip to be installed on your computer. See [Addon projects](docs/15-dev-addons.md).
+A `.cedev` file is a JSON addon source project. Put `gamifier.cedev` beside your program and use `import gamifier;` to load it—no installer or package installation is involved. See [Building and importing addons](docs/15-dev-addons.md) and the [Gamifier example](examples/gamifier-demo.ceasy).
 
 ## Secret values
 

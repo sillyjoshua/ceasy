@@ -1,4 +1,6 @@
 {
-  "name": "my-ceasy-project",
-  "addons": ["requests"]
+  "name": "hello_addon",
+  "version": "1.0.0",
+  "description": "A minimal Ceasy addon example.",
+  "source": "def greet(name):\\n    print('Hello, ' + str(name))\\n"
 }

@@ -7,7 +7,7 @@ if not exist "%CEASY_EXE%" (
   pause
   exit /b 1
 )
-for %%E in (.ce .ceasy .cedev) do (
+for %%E in (.ce .ceasy) do (
   reg add "HKCU\Software\Classes\%%E" /ve /d "CeasySourceFile" /f >nul
 )
 reg add "HKCU\Software\Classes\CeasySourceFile" /ve /d "Ceasy source file" /f >nul
@@ -19,6 +19,6 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Ceasy is installed for this Windows user.
-echo You can double-click .ce and .ceasy files to run them, or .cedev files to install addons.
+echo You can double-click .ce and .ceasy files to run them. Import .cedev addons from your .ceasy program.
 echo Keep ceasy.exe in this folder; the file association points to it.
 pause

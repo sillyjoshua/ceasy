@@ -15,6 +15,8 @@ on:
       - 'docs/15-dev-addons.md'
       - 'docs/16-secrets.md'
       - 'examples/starter.cedev'
+      - 'examples/gamifier.cedev'
+      - 'examples/gamifier-demo.ceasy'
       - 'examples/imports.ceasy'
       - 'examples/secret-demo.ceasy'
       - 'examples/secret-demo.cesecret.example'
@@ -56,6 +58,8 @@ jobs:
           Copy-Item examples/block-world.ceasy dist/ceasy-windows/examples/block-world.ceasy
           Copy-Item examples/imports.ceasy dist/ceasy-windows/examples/imports.ceasy
           Copy-Item examples/starter.cedev dist/ceasy-windows/examples/starter.cedev
+          Copy-Item examples/gamifier.cedev dist/ceasy-windows/examples/gamifier.cedev
+          Copy-Item examples/gamifier-demo.ceasy dist/ceasy-windows/examples/gamifier-demo.ceasy
           Copy-Item examples/secret-demo.ceasy dist/ceasy-windows/examples/secret-demo.ceasy
           Copy-Item examples/secret-demo.cesecret.example dist/ceasy-windows/examples/secret-demo.cesecret.example
           Compress-Archive -Path dist/ceasy-windows/* -DestinationPath dist/ceasy-windows.zip -Force

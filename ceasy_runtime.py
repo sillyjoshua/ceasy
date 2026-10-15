@@ -11,6 +11,7 @@ import statistics
 import datetime
 import time
 import decimal
+import types
 import operator
 import re
 import shutil
@@ -86,37 +87,43 @@ def load_secrets(path: Path) -> dict[str, SecretValue]:
         raise RuntimeErrorCeasy(f"{secret_path.name} must contain a JSON object of simple values")
     return {key: SecretValue(str(value)) for key, value in data.items()}
 
-def install_dev(path: Path) -> int:
+def load_addon(path: Path, expected_name: str, cache: dict[str, object]) -> object:
+    """Load a local .cedev addon project as an importable Python-backed module."""
     try:
         config = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeErrorCeasy(f"{path.name} must be a valid JSON .cedev project file") from exc
+        raise RuntimeErrorCeasy(f"{path.name} must be a valid JSON .cedev addon project") from exc
     if not isinstance(config, dict):
-        raise RuntimeErrorCeasy(".cedev file must contain a JSON object")
+        raise RuntimeErrorCeasy(".cedev addon must contain a JSON object")
     name = config.get("name", path.stem)
-    addons = config.get("addons", [])
-    if not isinstance(name, str) or not isinstance(addons, list):
-        raise RuntimeErrorCeasy(".cedev needs a string 'name' and an 'addons' list")
-    if not all(isinstance(a, str) and re.fullmatch(r"[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_,.-]+\])?", a) for a in addons):
-        raise RuntimeErrorCeasy("addon names must be package names, such as 'requests' or 'rich'")
-    print(f"Ceasy project: {name}")
-    if not addons:
-        print("No addons listed. Add package names to the 'addons' list in this .cedev file.")
-        return 0
-    if getattr(sys, "frozen", False):
-        python = shutil.which("python") or shutil.which("py")
-        if not python:
-            raise RuntimeErrorCeasy("install Python 3 to install addons; the standalone Ceasy app does not include pip")
-        command = [python, "-m", "pip", "install", *addons]
-    else:
-        command = [sys.executable, "-m", "pip", "install", *addons]
-    print("Installing addons:", ", ".join(addons))
+    source = config.get("source", "")
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_]\w*", name):
+        raise RuntimeErrorCeasy(".cedev 'name' must be a valid module name")
+    if name != expected_name or path.stem != expected_name:
+        raise RuntimeErrorCeasy(f"addon name must match its filename: {expected_name}.cedev")
+    if not isinstance(source, str) or not source.strip():
+        raise RuntimeErrorCeasy(f"{path.name} needs a non-empty Python 'source' string")
+    module = types.ModuleType(name)
+    module.__file__ = str(path)
+    module.__package__ = ""
+    cache[name] = module
     try:
-        subprocess.run(command, check=True)
-    except (OSError, subprocess.CalledProcessError) as exc:
-        raise RuntimeErrorCeasy(f"addon installation failed: {exc}") from exc
-    print("Addons installed. Use normal Python imports in your .ceasy file, for example: import requests")
-    return 0
+        exec(compile(source, str(path), "exec"), module.__dict__)
+    except Exception as exc:
+        cache.pop(name, None)
+        raise RuntimeErrorCeasy(f"could not load addon {name!r}: {exc}") from exc
+    return module
+
+
+def load_import(module_name: str, directory: Path, cache: dict[str, object]) -> object:
+    """Prefer a sibling .cedev addon; otherwise use an installed Python module."""
+    if module_name in cache:
+        return cache[module_name]
+    if re.fullmatch(r"[A-Za-z_]\w*", module_name):
+        addon_path = directory / f"{module_name}.cedev"
+        if addon_path.is_file():
+            return load_addon(addon_path, module_name, cache)
+    return importlib.import_module(module_name)
 
 def show_game(title: str, width: int, height: int, blocks: list[tuple[int, int, str, int]], texts: list[tuple[int, int, str]], player: list[int] | None) -> None:
     try:
@@ -180,6 +187,7 @@ def add_external_site_packages() -> None:
 def run_file(path: Path) -> None:
     add_external_site_packages()
     env: dict[str, object] = {}
+    addon_cache: dict[str, object] = {}
     secrets = load_secrets(path)
     def secret(name: str) -> SecretValue:
         if name not in secrets:
@@ -208,12 +216,15 @@ def run_file(path: Path) -> None:
             from_match = re.fullmatch(r"from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import\s+([A-Za-z_]\w*)(?:\s+as\s+([A-Za-z_]\w*))?", line)
             if import_match:
                 module_name, alias = import_match.groups()
-                module = importlib.import_module(module_name)
-                env[alias or module_name.split('.')[0]] = module if alias else importlib.import_module(module_name.split('.')[0])
+                module = load_import(module_name, path.parent, addon_cache)
+                if alias or "." not in module_name:
+                    env[alias or module_name] = module
+                else:
+                    env[module_name.split(".")[0]] = importlib.import_module(module_name.split(".")[0])
                 continue
             if from_match:
                 module_name, member, alias = from_match.groups()
-                module = importlib.import_module(module_name)
+                module = load_import(module_name, path.parent, addon_cache)
                 if member.startswith("_") or not hasattr(module, member):
                     raise RuntimeErrorCeasy(f"{member!r} is not available from {module_name}")
                 env[alias or member] = getattr(module, member)
@@ -230,7 +241,10 @@ def run_file(path: Path) -> None:
             if line.startswith("print(") and line.endswith(")"):
                 safe_print(eval_expr(line[6:-1], env))
                 continue
-            if re.match(r"[A-Za-z_]\w*\s*\(", line):
+            if re.match(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\s*\(", line):
+                if "." in line.split("(", 1)[0]:
+                    eval_expr(line, env)
+                    continue
                 name, args = call_args(line, env)
                 if name == "window" and len(args) == 3:
                     window = (str(args[0]), int(args[1]), int(args[2]))
@@ -244,8 +258,10 @@ def run_file(path: Path) -> None:
                     player = [int(args[0]), int(args[1])]
                 elif name == "text" and len(args) == 3:
                     texts.append((int(args[0]), int(args[1]), str(args[2])))
+                elif name in env and callable(env[name]):
+                    env[name](*args)
                 else:
-                    raise RuntimeErrorCeasy("supported graphics commands: window(title, width, height), block(x, y, type[, size]), player(x, y), text(x, y, message)")
+                    raise RuntimeErrorCeasy("supported commands: imported addon functions, window, block, player and text")
                 continue
             match = re.fullmatch(r"([A-Za-z_]\w*)\s*(\+=|-=|\*=|/=|=)\s*(.+)", line, re.S)
             if not match:
@@ -273,15 +289,14 @@ def main() -> int:
     args = [arg for arg in sys.argv[1:] if arg != "--pause"]
     pause = "--pause" in sys.argv[1:]
     if not args:
-        print("Ceasy: drag a .ce, .ceasy or .cedev file onto this program, or open a source file.")
+        print("Ceasy: drag a .ce or .ceasy file onto this program, or open a source file.")
         return 2
     path = Path(args[0])
     try:
         if path.suffix.lower() == ".cedev":
-            result = install_dev(path)
-        else:
-            run_file(path)
-            result = 0
+            raise RuntimeErrorCeasy(".cedev files are addon projects, not programs. Import one from a .ceasy file with: import " + path.stem + ";")
+        run_file(path)
+        result = 0
     except (OSError, RuntimeErrorCeasy) as exc:
         print(f"Ceasy error: {exc}", file=sys.stderr)
         if pause:

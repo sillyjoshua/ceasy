@@ -1,26 +1,37 @@
-# Addons with `.cedev`
+# Building and importing `.cedev` addons
 
-A `.cedev` file is a tiny JSON project file. Double-click it after installing the Ceasy Windows file association, or run it with `ceasy.exe my-project.cedev`. Ceasy installs the listed Python packages with `pip`.
+A `.cedev` file is an **addon project/source file**, not an installer. Ceasy does not install packages when you open it. Instead, save an addon such as `gamifier.cedev` beside your `.ceasy` program and import it by filename:
 
-Create `my-project.cedev`:
+```ceasy
+import gamifier;
+gamifier.start("My Game");
+gamifier.action("Finished my first task", 20);
+```
+
+## Addon file format
+
+A `.cedev` file is JSON with addon metadata and a `source` field containing Python code. Ceasy loads that source as an importable module when it sees `import <name>;` or `from <name> import <function>;`. The `name` must match the file name without `.cedev`.
 
 ```json
 {
-  "name": "my-first-project",
-  "addons": ["requests", "rich"]
+  "name": "hello_addon",
+  "version": "1.0.0",
+  "description": "A tiny example addon",
+  "source": "def greet(name):\n    print('Hello, ' + str(name))\n"
 }
 ```
 
-Double-click the file to install the addons. You need Python 3 and pip installed for package installation. Only install packages you trust: Python packages can execute code on your computer.
-
-Then import packages in a `.ceasy` program using familiar Python syntax:
+Save it as `hello_addon.cedev`, then use it from `app.ceasy`:
 
 ```ceasy
-import random;
-from math import sqrt;
-let roll = random.randint(1, 6);
-print(roll);
-print(sqrt(81));
+import hello_addon;
+hello_addon.greet("Ceasy");
 ```
 
-The same Python packages are available to the packaged Windows runtime when the matching system Python is installed. This feature is part of the double-click runtime; it is not yet supported by the C transpiler (`ceasy.py`).
+You can put the addon source directly in the JSON `source` string, escaping newlines as `\n`. The `examples/gamifier.cedev` file is a complete working addon and `examples/gamifier-demo.ceasy` shows how to use it.
+
+## Important security note
+
+Addon `source` is Python code and runs with your user's permissions when imported. Only import `.cedev` files you trust. A `.cedev` addon does not install Python packages, and there is no package installation step.
+
+This local `.cedev` import feature is supported by the double-click runtime. The C transpiler (`ceasy.py`) does not currently execute Python-backed addons.

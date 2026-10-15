@@ -35,6 +35,31 @@ class RuntimeTests(unittest.TestCase):
             self.assertTrue(lines[0].isdigit())
             self.assertEqual(lines[1], "9.0")
 
+    def test_local_cedev_addon_import(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            addon = folder / "tiny.cedev"
+            addon.write_text(json.dumps({
+                "name": "tiny",
+                "version": "1.0.0",
+                "source": "def greet(name):\n    print('Hi, ' + str(name))\n"
+            }), encoding="utf-8")
+            source = folder / "demo.ceasy"
+            source.write_text('import tiny;\ntiny.greet("Ceasy");\nfrom tiny import greet;\ngreet("again");\n', encoding="utf-8")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                run_file(source)
+            self.assertEqual(output.getvalue().splitlines(), ["Hi, Ceasy", "Hi, again"])
+
+    def test_cedev_addon_requires_matching_name_and_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder / "broken.cedev").write_text(json.dumps({"name": "other", "source": "print('no')"}), encoding="utf-8")
+            source = folder / "demo.ceasy"
+            source.write_text('import broken;\n', encoding="utf-8")
+            with self.assertRaises(RuntimeErrorCeasy):
+                run_file(source)
+
     def test_missing_secret_has_clear_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "demo.ceasy"
