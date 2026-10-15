@@ -1,0 +1,4 @@
+{
+  "name": "my-ceasy-project",
+  "addons": ["requests"]
+}

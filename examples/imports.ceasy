@@ -1,0 +1,7 @@
+# Python-style imports and calls
+import random;
+from math import sqrt;
+let dice = random.randint(1, 6);
+print("You rolled:");
+print(dice);
+print(sqrt(81));

@@ -2,11 +2,11 @@
 
 **C, without the intimidating first step.** Ceasy is a small, beginner-friendly, C-inspired language project. It uses readable commands such as `print("Hello!");` and `let score = 10;`.
 
-> **Status: early prototype.** Ceasy includes a small Python-to-C transpiler, a standalone Windows double-click runtime, beginner docs, and simple Minecraft-style 2D block graphics in the runtime.
+> **Version 0.2.0.** Ceasy includes a small Python-to-C transpiler, a Windows double-click runtime, Minecraft-style 2D block graphics, Python-style imports, `.cedev` addon project files, and `.cesecret` values that are redacted when printed directly.
 
 ## Windows: double-click `.ce` and `.ceasy` files
 
-1. Open the [Windows bundle workflow](https://github.com/sillyjoshua/ceasy/actions/workflows/build-windows.yml) and choose the latest successful run.
+1. Open the [latest Ceasy release](https://github.com/sillyjoshua/ceasy/releases/latest) or the [Windows bundle workflow](https://github.com/sillyjoshua/ceasy/actions/workflows/build-windows.yml) and choose the latest successful run.
 2. Download its `ceasy-windows` artifact and extract the ZIP to a permanent folder.
 3. Double-click `install-windows.bat` once.
 4. Create a `.ce` or `.ceasy` file and double-click it to run.
@@ -29,6 +29,22 @@ text(20, 20, "Hello, block world!");
 Run `examples/block-world.ceasy` to see a landscape and tree. Move the player with **WASD** or the **arrow keys**. Available blocks include grass, dirt, stone, sand, water, wood, planks, brick, leaves, bedrock, snow, gold, diamond and lava.
 
 Read [Simple Minecraft-style graphics](docs/14-block-graphics.md) for the short guide. This is 2D block-building graphics, not a full 3D Minecraft engine. Graphics commands currently work in the double-click runtime and are not yet translated by the C transpiler.
+
+## Python imports and addons
+
+Ceasy supports regular Python-style imports in the double-click runtime:
+
+```ceasy
+import random;
+let roll = random.randint(1, 6);
+print(roll);
+```
+
+A `.cedev` file is a small JSON project manifest. Double-click it to install its listed Python packages (addons). Addon installation requires Python and pip to be installed on your computer. See [Addon projects](docs/15-dev-addons.md).
+
+## Secret values
+
+Put values in a same-name `.cesecret` file beside your `.ceasy` file and access them with `secret("NAME")`. Directly printing a secret value shows `[secret]`, not the value. `.cesecret` is plain JSON, **not encrypted**; protect the file and never commit real credentials. See [Secret files](docs/16-secrets.md).
 
 ## Example
 
@@ -69,6 +85,8 @@ Start with [docs/00-start-here.md](docs/00-start-here.md). The learning guide is
 12. [FAQ and roadmap](docs/12-faq-roadmap.md)
 13. [Double-click Windows setup](docs/13-double-click-windows.md)
 14. [Block graphics](docs/14-block-graphics.md)
+15. [Addon projects](docs/15-dev-addons.md)
+16. [Secret files](docs/16-secrets.md)
 
 ## Contributing
 

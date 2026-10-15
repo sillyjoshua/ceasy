@@ -12,6 +12,13 @@ on:
       - 'examples/block-world.ceasy'
       - 'docs/13-double-click-windows.md'
       - 'docs/14-block-graphics.md'
+      - 'docs/15-dev-addons.md'
+      - 'docs/16-secrets.md'
+      - 'examples/starter.cedev'
+      - 'examples/imports.ceasy'
+      - 'examples/secret-demo.ceasy'
+      - 'examples/secret-demo.cesecret.example'
+      - 'tests/test_runtime.py'
       - '.github/workflows/build-windows.yml'
   workflow_dispatch:
 
@@ -30,6 +37,8 @@ jobs:
           python-version: '3.12'
       - name: Install packager
         run: python -m pip install -r requirements-build.txt
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
       - name: Build standalone Ceasy runtime
         run: python -m PyInstaller --noconfirm --clean --onefile --console --name ceasy ceasy_launcher.py
       - name: Assemble bundle
@@ -41,8 +50,14 @@ jobs:
           Copy-Item README.md dist/ceasy-windows/README.md
           Copy-Item docs/13-double-click-windows.md dist/ceasy-windows/WINDOWS-SETUP.md
           Copy-Item docs/14-block-graphics.md dist/ceasy-windows/BLOCK-GRAPHICS.md
+          Copy-Item docs/15-dev-addons.md dist/ceasy-windows/ADDONS.md
+          Copy-Item docs/16-secrets.md dist/ceasy-windows/SECRETS.md
           New-Item -ItemType Directory -Force -Path dist/ceasy-windows/examples | Out-Null
           Copy-Item examples/block-world.ceasy dist/ceasy-windows/examples/block-world.ceasy
+          Copy-Item examples/imports.ceasy dist/ceasy-windows/examples/imports.ceasy
+          Copy-Item examples/starter.cedev dist/ceasy-windows/examples/starter.cedev
+          Copy-Item examples/secret-demo.ceasy dist/ceasy-windows/examples/secret-demo.ceasy
+          Copy-Item examples/secret-demo.cesecret.example dist/ceasy-windows/examples/secret-demo.cesecret.example
           Compress-Archive -Path dist/ceasy-windows/* -DestinationPath dist/ceasy-windows.zip -Force
       - name: Upload Windows bundle
         uses: actions/upload-artifact@v4

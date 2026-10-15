@@ -39,8 +39,14 @@ jobs:
           Copy-Item README.md release/README.md
           Copy-Item docs/13-double-click-windows.md release/WINDOWS-SETUP.md
           Copy-Item docs/14-block-graphics.md release/BLOCK-GRAPHICS.md
+          Copy-Item docs/15-dev-addons.md release/ADDONS.md
+          Copy-Item docs/16-secrets.md release/SECRETS.md
           New-Item -ItemType Directory -Force -Path release/examples | Out-Null
           Copy-Item examples/block-world.ceasy release/examples/block-world.ceasy
+          Copy-Item examples/imports.ceasy release/examples/imports.ceasy
+          Copy-Item examples/starter.cedev release/examples/starter.cedev
+          Copy-Item examples/secret-demo.ceasy release/examples/secret-demo.ceasy
+          Copy-Item examples/secret-demo.cesecret.example release/examples/secret-demo.cesecret.example
           Compress-Archive -Path release/* -DestinationPath ceasy-windows.zip -Force
       - name: Publish GitHub Release
         env:
