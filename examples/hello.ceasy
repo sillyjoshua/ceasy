@@ -1,0 +1,4 @@
+# Your first Ceasy program
+print("Hello, world!");
+let score = 42;
+print(score);
