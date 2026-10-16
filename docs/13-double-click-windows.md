@@ -1,39 +1,22 @@
-# Run `.ce` and `.ceasy` files by double-clicking (Windows)
+# Windows setup
 
-Ceasy provides a standalone Windows runtime bundle so simple Ceasy programs can run without separately installing Python or GCC. GitHub Actions builds the bundle whenever the runtime files change.
+1. Download the latest **Ceasy Windows bundle** from the [releases page](https://github.com/sillyjoshua/ceasy/releases/latest).
+2. Extract the ZIP to a temporary folder.
+3. Double-click `install-windows.bat` once. You do not need to run it as Administrator.
+4. The installer copies `ceasy.exe` to `%LOCALAPPDATA%\Programs\Ceasy`, adds that folder to your **user PATH**, and registers the `.ce` and `.ceasy` file associations.
+5. Open a **new** Command Prompt or PowerShell window so it receives the updated PATH.
 
-## Download and set up once
+You can now run Ceasy from any folder:
 
-1. Open the repository's [Actions page](https://github.com/sillyjoshua/ceasy/actions/workflows/build-windows.yml).
-2. Open the latest successful **Build Windows double-click bundle** run.
-3. Download the `ceasy-windows` artifact and extract the ZIP to a permanent folder, such as `Documents\\Ceasy`.
-4. Double-click `install-windows.bat`. It registers `.ce` and `.ceasy` for your Windows user; administrator access should not be required.
-5. Keep `ceasy.exe` in that folder. The registered file association points to it.
-
-After setup, double-click a `.ce` or `.ceasy` file in File Explorer and its output appears in a console window. The console waits for Enter before closing.
-
-## Example
-
-Create `hello.ceasy` in Notepad and save it as **All files** (not Text Documents):
-
-```ceasy
-# Hello, Ceasy!
-print("Hello, world!");
-let answer = 6 * 7;
-print(answer);
+```powershell
+ceasy yourfile.ceasy
+ceasy yourfile.ce
 ```
 
-Double-click `hello.ceasy`. Expected output:
+You can also double-click a `.ce` or `.ceasy` file. The installed executable is stored separately from the extracted ZIP, so you can delete the extracted folder after installation.
 
-```text
-Hello, world!
-42
-```
+## PATH safety
 
-`.ce` and `.ceasy` use the same runtime.
+The installer edits the current user's PATH using the Windows/.NET environment API. It does **not** use `setx PATH`, which can truncate long PATH values. Existing PATH entries are preserved, and the Ceasy folder is only added if it is not already present.
 
-## Current runtime limitations
-
-The double-click runtime supports comments, `let` declarations, `print(...)`, basic numeric/string expressions and simple assignments. It does not yet execute `if`, `else`, `while`, `for`, custom functions, or arbitrary C code. Those are not silently claimed to work: the original `ceasy.py` transpiler remains available for generating C from the documented subset.
-
-This is a per-user Windows file association. Linux and macOS need their own packaging and file-association setup. If Windows still opens Notepad, right-click a `.ceasy` file, choose **Open with**, and select the installed `ceasy.exe`.
+The installer is per-user and does not require administrator permissions. If you want to uninstall Ceasy, remove `%LOCALAPPDATA%\Programs\Ceasy` and remove that folder from your user PATH.
