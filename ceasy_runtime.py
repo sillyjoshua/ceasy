@@ -205,9 +205,41 @@ def run_file(path: Path) -> None:
     blocks: list[tuple[int, int, str, int]] = []
     texts: list[tuple[int, int, str]] = []
     player: list[int] | None = None
-    for number, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
+    source_lines = path.read_text(encoding="utf-8-sig").splitlines()
+    # Track C-style if/else blocks while preserving the original source line numbers.
+    control_stack: list[dict[str, object]] = []
+    active = True
+    for number, raw in enumerate(source_lines, 1):
         line = raw.strip()
         if not line or line.startswith("#") or line.startswith("//"):
+            continue
+        # A closing brace followed by `else {` keeps the same frame alive.
+        if line == "}":
+            next_line = next((item.strip() for item in source_lines[number:] if item.strip() and not item.strip().startswith(("#", "//"))), "")
+            if control_stack and next_line == "else {":
+                frame = control_stack[-1]
+                active = False
+            else:
+                if not control_stack:
+                    raise RuntimeErrorCeasy(f"{path.name}:{number}: unexpected closing brace")
+                frame = control_stack.pop()
+                active = bool(frame["parent_active"])
+            continue
+        if line == "else {":
+            if not control_stack or bool(control_stack[-1].get("in_else")):
+                raise RuntimeErrorCeasy(f"{path.name}:{number}: unexpected else block")
+            frame = control_stack[-1]
+            frame["in_else"] = True
+            active = bool(frame["parent_active"]) and not bool(frame["condition"])
+            continue
+        if_match = re.fullmatch(r"if\s*\((.*)\)\s*\{", line, re.S)
+        if if_match:
+            parent_active = active
+            condition = bool(eval_expr(if_match.group(1), env)) if parent_active else False
+            control_stack.append({"parent_active": parent_active, "condition": condition, "in_else": False, "line": number})
+            active = parent_active and condition
+            continue
+        if not active:
             continue
         if line.endswith(";"):
             line = line[:-1].strip()
@@ -277,6 +309,9 @@ def run_file(path: Path) -> None:
             elif op == "/=": env[name] /= value
         except (RuntimeErrorCeasy, ValueError, TypeError, OverflowError, ImportError) as exc:
             raise RuntimeErrorCeasy(f"{path.name}:{number}: {exc}") from exc
+    if control_stack:
+        frame = control_stack[-1]
+        raise RuntimeErrorCeasy(f"{path.name}:{frame['line']}: unterminated if block; expected }}")
     if window is not None:
         title, width, height = window
         if not 160 <= width <= 1920 or not 120 <= height <= 1080:

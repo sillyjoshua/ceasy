@@ -13,4 +13,15 @@ if (age >= 13) {
 
 Operators familiar from C include `==`, `!=`, `<`, `<=`, `>` and `>=`. Use `==` to compare values; a single `=` is assignment.
 
-**Prototype limitation:** declarations and blocks are translated with minimal validation, and `print(...)` is currently handled by the translator's simple line-based rules. Nested blocks and complex conditions may not compile correctly. Check generated C before relying on a conditional program. Improving parsing and type checking is on the roadmap.
+The standalone `.ce`/`.ceasy` interpreter supports `if` and `else` blocks, including nested conditions. Put the opening brace on the same line as the condition and use a separate closing brace:
+
+```ceasy
+let age = 13;
+if (age >= 13) {
+    print("teen yeah");
+} else {
+    print("not a teenager");
+}
+```
+
+The C transpiler remains a separate, early feature with a limited parser; check generated C when using complex conditions or deeply nested code.
