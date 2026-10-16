@@ -214,6 +214,13 @@ def run_file(path: Path) -> None:
         if not line or line.startswith("#") or line.startswith("//"):
             continue
         # A closing brace followed by `else {` keeps the same frame alive.
+        if line == "} else {":
+            if not control_stack or bool(control_stack[-1].get("in_else")):
+                raise RuntimeErrorCeasy(f"{path.name}:{number}: unexpected else block")
+            frame = control_stack[-1]
+            frame["in_else"] = True
+            active = bool(frame["parent_active"]) and not bool(frame["condition"])
+            continue
         if line == "}":
             next_line = next((item.strip() for item in source_lines[number:] if item.strip() and not item.strip().startswith(("#", "//"))), "")
             if control_stack and next_line == "else {":

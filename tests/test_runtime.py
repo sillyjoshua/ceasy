@@ -9,6 +9,24 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ceasy_runtime import SecretValue, eval_expr, load_secrets, run_file, RuntimeErrorCeasy
 
 class RuntimeTests(unittest.TestCase):
+    def test_if_else_blocks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "condition.ceasy"
+            source.write_text('let age = 13;\nif (age >= 13) {\n    print("teen yeah");\n} else {\n    print("not teen");\n}\n', encoding="utf-8")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                run_file(source)
+            self.assertEqual(output.getvalue().strip(), "teen yeah")
+
+    def test_false_if_and_nested_if(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "condition.ceasy"
+            source.write_text('let age = 12;\nif (age >= 13) {\n    print("wrong");\n} else {\n    if (age == 12) {\n        print("correct");\n    }\n}\n', encoding="utf-8")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                run_file(source)
+            self.assertEqual(output.getvalue().strip(), "correct")
+
     def test_python_style_module_calls(self):
         import math
         self.assertEqual(eval_expr("math.sqrt(81)", {"math": math}), 9)
